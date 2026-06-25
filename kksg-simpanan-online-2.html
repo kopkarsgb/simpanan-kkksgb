@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simpanan Anggota — KKKSGB</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+  :root{--hijau-tua:#1A4731;--hijau:#2D7A50;--hijau-muda:#E8F5EE;--emas:#C9972B;--emas-muda:#FDF6E3;--abu:#F5F6F8;--abu-teks:#6B7280;--teks:#111827;--putih:#ffffff;--merah:#DC2626;--border:#E5E7EB;--ungu:#7C3AED;--ungu-muda:#EDE9FE;--biru:#1D4ED8;--biru-muda:#EFF6FF;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--abu);color:var(--teks);min-height:100vh;}
+  header{background:var(--hijau-tua);color:white;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:68px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.15);}
+  .logo{display:flex;align-items:center;gap:12px;}
+  .logo-img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--emas);background:white;}
+  .logo-text strong{font-size:15px;font-weight:800;}
+  .logo-text span{font-size:11px;color:rgba(255,255,255,.65);display:block;}
+  .header-right{display:flex;align-items:center;gap:10px;}
+  .login-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;transition:.2s;}
+  .login-btn:hover{background:rgba(255,255,255,.25);}
+  .mode-bar{background:var(--putih);border-bottom:1px solid var(--border);padding:0 20px;display:flex;gap:4px;overflow-x:auto;}
+  .tab{padding:14px 16px;font-size:13px;font-weight:600;color:var(--abu-teks);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap;font-family:inherit;}
+  .tab.active{color:var(--hijau);border-bottom-color:var(--hijau);}
+  main{max-width:960px;margin:0 auto;padding:20px 16px;}
+  .panel{display:none;}.panel.active{display:block;}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px;}
+  .stat-card{background:var(--putih);border-radius:14px;padding:16px;border:1px solid var(--border);}
+  .stat-card.hijau{background:var(--hijau-tua);color:white;}
+  .stat-card.emas{background:var(--emas);color:white;}
+  .stat-card.biru{background:var(--biru);color:white;}
+  .stat-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;opacity:.7;margin-bottom:6px;}
+  .stat-card.hijau .stat-label,.stat-card.emas .stat-label,.stat-card.biru .stat-label{color:white;opacity:.85;}
+  .stat-value{font-size:18px;font-weight:800;font-family:'JetBrains Mono',monospace;}
+  .card{background:var(--putih);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px;}
+  .card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .card-title{font-size:14px;font-weight:700;}
+  .tbl-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;min-width:400px;}
+  th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--abu-teks);background:var(--abu);border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:var(--hijau-muda);}
+  .no-anggota{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--abu-teks);}
+  .saldo-num{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--hijau-tua);}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+  .b-lunas{background:#D1FAE5;color:#065F46;}
+  .b-belum{background:#FEE2E2;color:#991B1B;}
+  .bln-grid{display:flex;gap:3px;flex-wrap:wrap;}
+  .bln-dot{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;}
+  .bln-dot.ok{background:#D1FAE5;color:#065F46;}
+  .bln-dot.no{background:#FEE2E2;color:#991B1B;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:18px;}
+  @media(max-width:580px){.form-grid{grid-template-columns:1fr;}}
+  .form-group{display:flex;flex-direction:column;gap:5px;}
+  .form-group.full{grid-column:1/-1;}
+  label{font-size:11px;font-weight:700;color:var(--abu-teks);text-transform:uppercase;letter-spacing:.5px;}
+  input,select{padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;transition:.2s;}
+  input:focus,select:focus{border-color:var(--hijau);box-shadow:0 0 0 3px rgba(45,122,80,.08);}
+  .btn{padding:10px 20px;border-radius:9px;border:none;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s;}
+  .btn-primary{background:var(--hijau);color:white;}
+  .btn-primary:hover{background:var(--hijau-tua);}
+  .btn-outline{background:none;border:1px solid var(--hijau);color:var(--hijau);}
+  .btn-outline:hover{background:var(--hijau-muda);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .form-actions{display:flex;gap:10px;justify-content:flex-end;padding:0 18px 18px;}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+  .overlay.show{display:flex;}
+  .modal{background:white;border-radius:18px;padding:28px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+  .modal h2{font-size:18px;font-weight:800;margin-bottom:6px;}
+  .modal p{font-size:13px;color:var(--abu-teks);margin-bottom:20px;}
+  .modal-input{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:10px;font-size:15px;font-family:inherit;outline:none;margin-bottom:10px;}
+  .modal-input:focus{border-color:var(--hijau);}
+  .modal-actions{display:flex;gap:10px;margin-top:4px;}
+  .modal-err{font-size:12px;color:var(--merah);margin-bottom:8px;display:none;}
+  .profil-box{background:var(--hijau-tua);color:white;border-radius:14px;padding:20px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+  .profil-info strong{font-size:17px;font-weight:800;}
+  .profil-info span{font-size:12px;opacity:.7;display:block;margin-top:2px;}
+  .profil-saldo .lbl{font-size:10px;opacity:.7;text-transform:uppercase;letter-spacing:.6px;}
+  .profil-saldo .val{font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace;}
+  .logout-btn{font-size:12px;color:rgba(255,255,255,.7);background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:underline;margin-top:4px;display:block;}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:620px){.two-col{grid-template-columns:1fr;}}
+  .rahasia-banner{background:var(--ungu-muda);border:1px solid #C4B5FD;border-radius:10px;padding:12px 16px;font-size:12.5px;color:#4C1D95;margin-bottom:16px;display:flex;gap:8px;align-items:center;}
+  .info-banner{background:var(--emas-muda);border:1px solid #E6C56A;border-radius:10px;padding:12px 16px;font-size:12.5px;color:#7A5000;margin-bottom:16px;display:flex;gap:8px;align-items:flex-start;}
+  .loading{text-align:center;padding:40px;color:var(--abu-teks);}
+  .spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--hijau);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:10px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .notif{position:fixed;bottom:24px;right:24px;background:var(--hijau-tua);color:white;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.2);transform:translateY(80px);opacity:0;transition:.3s;z-index:999;max-width:300px;}
+  .notif.show{transform:translateY(0);opacity:1;}
+  select{padding:7px 12px;font-size:12px;border-radius:8px;border:1px solid var(--border);font-family:inherit;outline:none;}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <img class="logo-img" src="data:image/jpeg;base64,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" alt="Logo KKKSGB">
+    <div class="logo-text">
+      <strong>KKKSGB</strong>
+      <span>Koperasi Konsumen Karyawan Semen Grobogan</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="login-btn" id="header-login-btn" onclick="bukaModal('anggota')">🔐 Login Anggota</button>
+  </div>
+</header>
+<div class="mode-bar">
+  <button class="tab active" onclick="showTab('publik',this)">🌐 Papan Simpanan</button>
+  <button class="tab" id="tab-pribadi" onclick="cekLoginDulu(this)">👤 Simpanan Saya</button>
+  <button class="tab" id="tab-admin" onclick="bukaModal('admin')">⚙️ Panel Admin</button>
+</div>
+<main>
+  <!-- PUBLIK -->
+  <div id="panel-publik" class="panel active">
+    <div class="info-banner">📢 <span>Halaman ini dapat dilihat semua anggota. Menampilkan <strong>simpanan wajib & simpanan pokok</strong>. Simpanan sukarela bersifat rahasia.</span></div>
+    <div class="stats-grid">
+      <div class="stat-card hijau"><div class="stat-label">Total Anggota</div><div class="stat-value" id="pub-total">—</div></div>
+      <div class="stat-card emas"><div class="stat-label">Total Simpanan Wajib</div><div class="stat-value" id="pub-rp">—</div></div>
+      <div class="stat-card biru"><div class="stat-label">Total Simpanan Pokok</div><div class="stat-value" id="pub-pokok">—</div></div>
+      <div class="stat-card"><div class="stat-label" style="color:var(--abu-teks)">Lunas Bln Ini</div><div class="stat-value" id="pub-lunas" style="color:#065F46">—</div></div>
+      <div class="stat-card"><div class="stat-label" style="color:var(--abu-teks)">Belum Setor</div><div class="stat-value" id="pub-belum" style="color:var(--merah)">—</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Rekap Simpanan Semua Anggota</span>
+        <select id="filter-bulan" onchange="renderPublik()"><option value="semua">Semua Periode</option></select>
+      </div>
+      <div id="publik-loading" class="loading"><div class="spinner"></div><br>Memuat data...</div>
+      <div class="tbl-wrap" id="publik-tbl" style="display:none">
+        <table>
+          <thead><tr><th>No.</th><th>No. Anggota</th><th>Nama</th><th>Dept.</th><th>Simpanan Pokok</th><th id="th-kol">Simpanan Wajib</th><th>Status Bln Ini</th></tr></thead>
+          <tbody id="tbl-publik"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRIBADI -->
+  <div id="panel-pribadi" class="panel">
+    <div class="profil-box">
+      <div class="profil-info">
+        <strong id="pr-nama">—</strong>
+        <span id="pr-id">—</span>
+        <span id="pr-dept" style="font-size:11px;opacity:.6">—</span>
+      </div>
+      <div class="profil-saldo">
+        <div class="lbl">Total Simpanan Wajib</div>
+        <div class="val" id="pr-sw-total">—</div>
+        <button class="logout-btn" onclick="logout()">Keluar</button>
+      </div>
+    </div>
+    <div class="rahasia-banner">🔒 <strong>Simpanan sukarela Anda bersifat rahasia</strong> — hanya Anda yang dapat melihatnya.</div>
+    <div id="pribadi-loading" class="loading"><div class="spinner"></div><br>Memuat data...</div>
+    <div id="pribadi-content" style="display:none">
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-header"><span class="card-title">🏦 Simpanan Pokok</span></div>
+        <div style="padding:16px 18px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:13px;color:var(--abu-teks)">Dibayar sekali saat masuk koperasi</span>
+          <span class="saldo-num" style="color:var(--biru)" id="pr-pokok">—</span>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><span class="card-title">💳 Simpanan Wajib</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Periode</th><th>Nominal</th><th>Ket.</th></tr></thead><tbody id="tbl-pr-sw"></tbody></table></div>
+          <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--abu-teks)">Total:</span><span class="saldo-num" id="pr-sw-sub">—</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">🔒 Simpanan Sukarela</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>Periode</th><th>Nominal</th><th>Ket.</th></tr></thead><tbody id="tbl-pr-ss"></tbody></table></div>
+          <div style="padding:12px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--abu-teks)">Total:</span><span class="saldo-num" id="pr-ss-sub">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="panel-admin" class="panel">
+    <div class="info-banner">⚙️ <span><strong>Panel Admin</strong> — Kelola data setoran dan anggota KKKSGB.</span></div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">➕ Input Setoran</span></div>
+      <div class="form-grid">
+        <div class="form-group"><label>No. Anggota</label><input type="text" id="inp-id" placeholder="cth: KKSG-001" oninput="this.value=this.value.toUpperCase()"></div>
+        <div class="form-group"><label>Jenis Simpanan</label><select id="inp-jenis" style="padding:10px 14px;font-size:14px;"><option value="wajib">Simpanan Wajib</option><option value="sukarela">Simpanan Sukarela</option></select></div>
+        <div class="form-group"><label>Periode</label><input type="month" id="inp-periode"></div>
+        <div class="form-group"><label>Jumlah (Rp)</label><input type="number" id="inp-jumlah" placeholder="cth: 100000" min="0"></div>
+        <div class="form-group full"><label>Keterangan (opsional)</label><input type="text" id="inp-ket" placeholder="cth: Setoran tunai via kasir"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-outline" onclick="resetFormAdmin()">Reset</button>
+        <button class="btn btn-primary" id="btn-simpan" onclick="simpanSetoran()">💾 Simpan Setoran</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">👤 Tambah Anggota Baru</span></div>
+      <div class="form-grid">
+        <div class="form-group"><label>No. Anggota</label><input type="text" id="new-id" placeholder="cth: KKSG-013" oninput="this.value=this.value.toUpperCase()"></div>
+        <div class="form-group"><label>Nama Lengkap</label><input type="text" id="new-nama" placeholder="Nama anggota"></div>
+        <div class="form-group"><label>Departemen</label><input type="text" id="new-dept" placeholder="cth: Produksi"></div>
+        <div class="form-group"><label>Password</label><input type="text" id="new-pass" placeholder="cth: no. HP / NIK"></div>
+        <div class="form-group"><label>Simpanan Pokok (Rp)</label><input type="number" id="new-pokok" placeholder="cth: 500000" min="0"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" id="btn-tambah-anggota" onclick="tambahAnggota()">➕ Tambah Anggota</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Data Semua Anggota</span>
+        <button class="btn btn-outline" style="font-size:12px;padding:6px 14px" onclick="muatDataPublik()">🔄 Refresh</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>No. Anggota</th><th>Nama</th><th>Dept.</th><th>Simpanan Pokok</th><th>Total Wajib</th><th>Status Bln Ini</th></tr></thead>
+          <tbody id="tbl-admin"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="overlay" id="modal-anggota">
+  <div class="modal">
+    <h2>🔐 Login Anggota</h2>
+    <p>Masukkan nomor anggota dan password untuk melihat simpanan pribadi Anda.</p>
+    <input class="modal-input" id="login-id" type="text" placeholder="No. Anggota (cth: KKSG-001)" oninput="this.value=this.value.toUpperCase()">
+    <input class="modal-input" id="login-pass" type="password" placeholder="Password">
+    <div class="modal-err" id="login-err">ID atau password salah. Coba lagi.</div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" style="flex:1" onclick="tutupModal('anggota')">Batal</button>
+      <button class="btn btn-primary" style="flex:2" id="btn-login" onclick="loginAnggota()">Masuk</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="modal-admin">
+  <div class="modal">
+    <h2>⚙️ Login Admin</h2>
+    <p>Masukkan password pengurus koperasi.</p>
+    <input class="modal-input" id="admin-pass" type="password" placeholder="Password Admin">
+    <div class="modal-err" id="admin-err">Password salah. Hubungi pengurus jika lupa.</div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" style="flex:1" onclick="tutupModal('admin')">Batal</button>
+      <button class="btn btn-primary" style="flex:2" id="btn-admin-login" onclick="loginAdmin()">Masuk</button>
+    </div>
+  </div>
+</div>
+<div class="notif" id="notif"></div>
+
+<script>
+const API='https://script.google.com/macros/s/AKfycbzLBoEh4kcBpGL9oDnvRI0mP6wxPzD3lDWauEvUHMnDlHYAOtKyqPdmqCTQ3vSe5_sLaw/exec';
+let dataPublik=[],akunLogin=null,passwordAnggotaTemp='';
+function formatPeriode(p){
+  if(!p) return '—';
+  // Jika berupa tanggal/timestamp, ambil tahun-bulan saja
+  const s=String(p);
+  // Jika sudah format YYYY-MM, langsung return
+  if(/^[0-9]{4}-[0-9]{2}$/.test(s)) return s;
+  // Jika berupa tanggal panjang, parse dan format ulang
+  try{
+    const d=new Date(s);
+    if(!isNaN(d.getTime())){
+      return d.getFullYear()+'-'+(String(d.getMonth()+1).padStart(2,'0'));
+    }
+  }catch(e){}
+  return s;
+}
+const BLN_LABEL={'01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'Mei','06':'Jun','07':'Jul','08':'Agu','09':'Sep','10':'Okt','11':'Nov','12':'Des'};
+const rp=n=>'Rp '+Number(n).toLocaleString('id-ID');
+const rpK=n=>n>=1000000?'Rp '+(n/1000000).toFixed(1)+' Jt':rp(n);
+function blnIni(){const d=new Date();return d.getFullYear()+'-'+(String(d.getMonth()+1).padStart(2,'0'));}
+function lunasBulan(a,bln){return a.simpanan_wajib.some(s=>formatPeriode(s.periode)===bln);}
+function totalW(a){return a.simpanan_wajib.reduce((s,x)=>s+Number(x.jumlah),0);}
+function statusBadge(a,bln){return lunasBulan(a,bln)?'<span class="badge b-lunas">✔ Lunas</span>':'<span class="badge b-belum">✕ Belum</span>';}
+function dotBulan(a,periodes){return '<div class="bln-grid">'+periodes.map(b=>{const ok=lunasBulan(a,b);const lbl=BLN_LABEL[b.split('-')[1]]||b;return '<div class="bln-dot '+(ok?'ok':'no')+'" title="'+b+'">'+lbl+'</div>';}).join('')+'</div>';}
+
+async function muatDataPublik(){
+  document.getElementById('publik-loading').style.display='block';
+  document.getElementById('publik-tbl').style.display='none';
+  try{
+    const res=await fetch(API+'?action=publik');
+    const json=await res.json();
+    if(json.success){
+      dataPublik=json.data;
+      const semua=new Set();
+      dataPublik.forEach(a=>a.simpanan_wajib.forEach(s=>semua.add(formatPeriode(s.periode))));
+      const sorted=[...semua].sort().reverse();
+      const sel=document.getElementById('filter-bulan');
+      const bln=blnIni();
+      sel.innerHTML='<option value="semua">Semua Periode</option>'+sorted.map(b=>'<option value="'+b+'" '+(b===bln?'selected':'')+'>'+b+'</option>').join('');
+      renderPublik();renderTabelAdmin();
+    }else{document.getElementById('publik-loading').innerHTML='<p style="color:var(--merah)">⚠ Gagal: '+json.message+'</p>';}
+  }catch(e){document.getElementById('publik-loading').innerHTML='<p style="color:var(--merah)">⚠ Gagal koneksi.</p>';}
+}
+
+function renderPublik(){
+  const filterBln=document.getElementById('filter-bulan').value;
+  const bln=blnIni();const semua=filterBln==='semua';
+  document.getElementById('th-kol').textContent=semua?'Status Per Bulan':'Nominal Setor';
+  const lunas=dataPublik.filter(a=>lunasBulan(a,bln)).length;
+  const totalRp=dataPublik.reduce((s,a)=>s+totalW(a),0);
+  const totalPokok=dataPublik.reduce((s,a)=>s+Number(a.simpanan_pokok||0),0);
+  document.getElementById('pub-total').textContent=dataPublik.length;
+  document.getElementById('pub-lunas').textContent=lunas;
+  document.getElementById('pub-belum').textContent=dataPublik.length-lunas;
+  document.getElementById('pub-rp').textContent=rpK(totalRp);
+  document.getElementById('pub-pokok').textContent=rpK(totalPokok);
+  const periodes=[...new Set(dataPublik.flatMap(a=>a.simpanan_wajib.map(s=>formatPeriode(s.periode))))].sort();
+  document.getElementById('tbl-publik').innerHTML=dataPublik.map((a,i)=>{
+    let kolom=semua?dotBulan(a,periodes):(()=>{const s=a.simpanan_wajib.find(x=>x.periode===filterBln);return s?'<span class="saldo-num">'+rp(s.jumlah)+'</span>':'<span style="color:var(--abu-teks);font-size:12px">—</span>';})();
+    const pokok=Number(a.simpanan_pokok||0);
+    const pokokCol=pokok>0?'<span class="saldo-num" style="color:var(--biru)">'+rp(pokok)+'</span>':'<span class="badge b-belum">Belum</span>';
+    return '<tr><td style="color:var(--abu-teks);font-size:12px">'+(i+1)+'</td><td class="no-anggota">'+a.id_anggota+'</td><td><strong>'+a.nama+'</strong></td><td style="font-size:12px;color:var(--abu-teks)">'+(a.departemen||'—')+'</td><td>'+pokokCol+'</td><td>'+kolom+'</td><td>'+statusBadge(a,bln)+'</td></tr>';
+  }).join('')||'<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--abu-teks)">Belum ada data</td></tr>';
+  document.getElementById('publik-loading').style.display='none';
+  document.getElementById('publik-tbl').style.display='block';
+}
+
+async function loginAnggota(){
+  const id=document.getElementById('login-id').value.trim();
+  const pass=document.getElementById('login-pass').value.trim();
+  if(!id||!pass){showNotif('⚠ Isi semua kolom!');return;}
+  const btn=document.getElementById('btn-login');
+  btn.disabled=true;btn.textContent='Memuat...';
+  document.getElementById('login-err').style.display='none';
+  try{
+    const res=await fetch(API+'?action=login&id='+encodeURIComponent(id)+'&password='+encodeURIComponent(pass));
+    const json=await res.json();
+    if(json.success){
+      akunLogin={id,nama:json.nama,departemen:json.departemen,simpanan_pokok:json.simpanan_pokok||0};
+      passwordAnggotaTemp=pass;
+      tutupModal('anggota');
+      document.getElementById('header-login-btn').textContent='✅ '+json.nama;
+      document.getElementById('header-login-btn').onclick=null;
+      document.getElementById('tab-pribadi').onclick=()=>{muatDataPribadi();showTab('pribadi',document.getElementById('tab-pribadi'));};
+      await muatDataPribadi();
+      showTab('pribadi',document.getElementById('tab-pribadi'));
+      showNotif('✅ Selamat datang, '+json.nama+'!');
+    }else{document.getElementById('login-err').style.display='block';}
+  }catch(e){showNotif('⚠ Gagal koneksi.');}
+  btn.disabled=false;btn.textContent='Masuk';
+}
+
+async function muatDataPribadi(){
+  document.getElementById('pribadi-loading').style.display='block';
+  document.getElementById('pribadi-content').style.display='none';
+  try{
+    const res=await fetch(API+'?action=pribadi&id='+encodeURIComponent(akunLogin.id)+'&password='+encodeURIComponent(passwordAnggotaTemp));
+    const json=await res.json();
+    if(json.success){renderPribadi(json);}
+  }catch(e){showNotif('⚠ Gagal koneksi.');}
+}
+
+function renderPribadi(d){
+  document.getElementById('pr-nama').textContent=d.nama;
+  document.getElementById('pr-id').textContent=akunLogin.id;
+  document.getElementById('pr-dept').textContent=d.departemen||'—';
+  const totalSW=d.simpanan_wajib.reduce((s,x)=>s+Number(x.jumlah),0);
+  const totalSS=d.simpanan_sukarela.reduce((s,x)=>s+Number(x.jumlah),0);
+  document.getElementById('pr-sw-total').textContent=rp(totalSW);
+  document.getElementById('pr-sw-sub').textContent=rp(totalSW);
+  document.getElementById('pr-ss-sub').textContent=rp(totalSS);
+  document.getElementById('pr-pokok').textContent=rp(Number(d.simpanan_pokok||0));
+  document.getElementById('tbl-pr-sw').innerHTML=d.simpanan_wajib.length?[...d.simpanan_wajib].reverse().map(s=>'<tr><td style="font-size:12px">'+formatPeriode(s.periode)+'</td><td class="saldo-num">'+rp(s.jumlah)+'</td><td style="font-size:12px;color:var(--abu-teks)">'+(s.keterangan||'—')+'</td></tr>').join(''):'<tr><td colspan="3" style="text-align:center;padding:16px;color:var(--abu-teks)">Belum ada setoran</td></tr>';
+  document.getElementById('tbl-pr-ss').innerHTML=d.simpanan_sukarela.length?[...d.simpanan_sukarela].reverse().map(s=>'<tr><td style="font-size:12px">'+formatPeriode(s.periode)+'</td><td class="saldo-num">'+rp(s.jumlah)+'</td><td style="font-size:12px;color:var(--abu-teks)">'+(s.keterangan||'—')+'</td></tr>').join(''):'<tr><td colspan="3" style="text-align:center;padding:16px;color:var(--abu-teks)">Belum ada simpanan sukarela</td></tr>';
+  document.getElementById('pribadi-loading').style.display='none';
+  document.getElementById('pribadi-content').style.display='block';
+}
+
+function renderTabelAdmin(){
+  const bln=blnIni();
+  document.getElementById('tbl-admin').innerHTML=dataPublik.map(a=>'<tr><td class="no-anggota">'+a.id_anggota+'</td><td><strong>'+a.nama+'</strong></td><td style="font-size:12px;color:var(--abu-teks)">'+(a.departemen||'—')+'</td><td class="saldo-num" style="color:var(--biru)">'+rp(Number(a.simpanan_pokok||0))+'</td><td class="saldo-num">'+rp(totalW(a))+'</td><td>'+statusBadge(a,bln)+'</td></tr>').join('')||'<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--abu-teks)">Belum ada data</td></tr>';
+}
+
+async function loginAdmin(){
+  const pass=document.getElementById('admin-pass').value;
+  if(!pass){showNotif('⚠ Masukkan password!');return;}
+  const btn=document.getElementById('btn-admin-login');
+  btn.disabled=true;btn.textContent='Memverifikasi...';
+  document.getElementById('admin-err').style.display='none';
+  try{
+    const res=await fetch(API+'?action=cek_admin&password='+encodeURIComponent(pass));
+    const json=await res.json();
+    if(json.success){
+      tutupModal('admin');
+      document.getElementById('admin-pass').value='';
+      const d=new Date();
+      document.getElementById('inp-periode').value=d.getFullYear()+'-'+(String(d.getMonth()+1).padStart(2,'0'));
+      showTab('admin',document.getElementById('tab-admin'));
+      showNotif('✅ Login admin berhasil!');
+    }else{document.getElementById('admin-err').style.display='block';}
+  }catch(e){showNotif('⚠ Gagal koneksi.');}
+  btn.disabled=false;btn.textContent='Masuk';
+}
+
+async function simpanSetoran(){
+  const id=document.getElementById('inp-id').value.trim();
+  const jenis=document.getElementById('inp-jenis').value;
+  const periode=document.getElementById('inp-periode').value;
+  const jumlah=parseInt(document.getElementById('inp-jumlah').value);
+  const ket=document.getElementById('inp-ket').value.trim();
+  if(!id||!periode||!jumlah||jumlah<=0){showNotif('⚠ Lengkapi semua kolom!');return;}
+  const btn=document.getElementById('btn-simpan');
+  btn.disabled=true;btn.textContent='Menyimpan...';
+  try{
+    const res=await fetch(API,{method:'POST',body:JSON.stringify({action:'tambah_'+jenis,id_anggota:id,periode,jumlah,keterangan:ket})});
+    const json=await res.json();
+    if(json.success){showNotif('✅ Setoran berhasil disimpan!');resetFormAdmin();await muatDataPublik();}
+    else{showNotif('⚠ Gagal: '+json.message);}
+  }catch(e){showNotif('⚠ Gagal koneksi.');}
+  btn.disabled=false;btn.textContent='💾 Simpan Setoran';
+}
+
+async function tambahAnggota(){
+  const id=document.getElementById('new-id').value.trim();
+  const nama=document.getElementById('new-nama').value.trim();
+  const dept=document.getElementById('new-dept').value.trim();
+  const pass=document.getElementById('new-pass').value.trim();
+  const pokok=parseInt(document.getElementById('new-pokok').value)||0;
+  if(!id||!nama||!dept||!pass){showNotif('⚠ Lengkapi semua kolom!');return;}
+  const btn=document.getElementById('btn-tambah-anggota');
+  btn.disabled=true;btn.textContent='Menyimpan...';
+  try{
+    const res=await fetch(API,{method:'POST',body:JSON.stringify({action:'tambah_anggota',id_anggota:id,nama,departemen:dept,password:pass,simpanan_pokok:pokok})});
+    const json=await res.json();
+    if(json.success){showNotif('✅ Anggota '+nama+' berhasil ditambahkan!');['new-id','new-nama','new-dept','new-pass','new-pokok'].forEach(i=>document.getElementById(i).value='');await muatDataPublik();}
+    else{showNotif('⚠ Gagal: '+json.message);}
+  }catch(e){showNotif('⚠ Gagal koneksi.');}
+  btn.disabled=false;btn.textContent='➕ Tambah Anggota';
+}
+
+function logout(){akunLogin=null;passwordAnggotaTemp='';document.getElementById('header-login-btn').textContent='🔐 Login Anggota';document.getElementById('header-login-btn').onclick=()=>bukaModal('anggota');document.getElementById('tab-pribadi').onclick=()=>cekLoginDulu(document.getElementById('tab-pribadi'));showTab('publik',document.querySelector('.tab'));showNotif('👋 Berhasil keluar.');}
+function cekLoginDulu(el){if(!akunLogin){bukaModal('anggota');showNotif('🔐 Silakan login dulu.');return;}showTab('pribadi',el);}
+function bukaModal(t){document.getElementById('modal-'+t).classList.add('show');}
+function tutupModal(t){document.getElementById('modal-'+t).classList.remove('show');document.getElementById(t==='anggota'?'login-err':'admin-err').style.display='none';}
+function showTab(id,el){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('panel-'+id).classList.add('active');if(el)el.classList.add('active');}
+function resetFormAdmin(){['inp-id','inp-jumlah','inp-ket'].forEach(i=>document.getElementById(i).value='');}
+function showNotif(msg){const n=document.getElementById('notif');n.textContent=msg;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),3500);}
+window.onload=()=>{muatDataPublik();};
+</script>
+</body>
+</html>
